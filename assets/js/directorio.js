@@ -195,19 +195,44 @@
   });
 
   async function loadCustomJson(){
-    try{
-      const res = await fetch(CUSTOM_JSON_URL, { headers: { 'Accept': 'application/json' } });
-      if(!res.ok) return; // opcional
-      const data = await res.json();
-      if(Array.isArray(data)){
-        customItems = data.map(toItemFromCustom).filter(it => it.lat && it.lon);
-        // Render inicial: todos los lugares del JSON
-        customItems.forEach(addMarker);
-        renderList(customItems);
-        fitToMarkers();
+    // 1) Intentar leer JSON incrustado en el HTML
+    const inlineEl = document.getElementById('lugares-data');
+    if(inlineEl){
+      try{
+        const inlineData = JSON.parse(inlineEl.textContent || '[]');
+        if(Array.isArray(inlineData)){
+          customItems = inlineData.map(toItemFromCustom).filter(it => it.lat && it.lon);
+        }
+      }catch(err){
+        console.warn('JSON incrustado inválido:', err);
       }
-    }catch(err){
-      console.warn('No se pudo cargar el JSON personalizado:', err);
+    }
+
+    // 2) Si no hay datos incrustados, intentar cargar desde archivo (solo si bajo http/https)
+    if(customItems.length === 0 && location.protocol !== 'file:'){
+      try{
+        const res = await fetch(CUSTOM_JSON_URL, { headers: { 'Accept': 'application/json' } });
+        if(res.ok){
+          const data = await res.json();
+          if(Array.isArray(data)){
+            customItems = data.map(toItemFromCustom).filter(it => it.lat && it.lon);
+          }
+        }
+      }catch(err){
+        console.warn('No se pudo cargar el JSON desde archivo:', err);
+      }
+    }
+
+    // Render inicial si hay datos
+    if(customItems.length){
+      customItems.forEach(addMarker);
+      renderList(customItems);
+      fitToMarkers();
+    } else {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-warning';
+      alert.textContent = 'No hay datos de ubicaciones disponibles.';
+      resultList.appendChild(alert);
     }
   }
 
