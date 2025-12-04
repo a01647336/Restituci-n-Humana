@@ -1,27 +1,28 @@
 (function(){
   const mapEl = document.getElementById('map');
-  const form = document.getElementById('searchForm');
-  const dirInput = document.getElementById('direccion');
-  const radiusInput = document.getElementById('radio');
-  const btnUbicacion = document.getElementById('btnUbicacion');
+  const filtroInput = document.getElementById('filtro');
   const btnLimpiar = document.getElementById('btnLimpiar');
   const resultList = document.getElementById('resultList');
+  
+  // Integración de JSON personalizado (opcionales)
+  const CUSTOM_JSON_URL = 'assets/data/lugares.json';
+  let customItems = [];
 
   if(!mapEl) return;
 
-  const defaultLatLng = [23.6345, -102.5528]; // Centro aproximado de México
-  const map = L.map(mapEl).setView(defaultLatLng, 5);
+  const defaultLatLng = [20.6736, -103.344]; // Centro en Jalisco (aprox. Guadalajara)
+  const map = L.map(mapEl).setView(defaultLatLng, 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
 
   const markers = L.layerGroup().addTo(map);
-  let originMarker = null;
+  let itemMarkers = [];
 
   function clearResults(){
     markers.clearLayers();
-    if(originMarker){ map.removeLayer(originMarker); originMarker = null; }
+    itemMarkers = [];
     resultList.innerHTML = '';
   }
 
@@ -82,15 +83,15 @@
     popup.appendChild(h); popup.appendChild(document.createElement('br')); popup.appendChild(p);
     marker.bindPopup(popup);
     marker.addTo(markers);
+    itemMarkers.push({ marker, item });
+  }
+  
+  function addItems(items){
+    items.forEach(it => { addMarker(it); addResultItem(it); });
+    fitToMarkers();
   }
 
-  async function geocode(q){
-    const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(q)}`;
-    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    if(!res.ok) throw new Error('Error al geocodificar');
-    const data = await res.json();
-    return data && data.length ? { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), display_name: data[0].display_name } : null;
-  }
+  // Se elimina geocodificación externa: sólo datos locales
 
   function overpassQuery(lat, lon, radius){
     return `[
@@ -108,17 +109,7 @@
     `;
   }
 
-  async function fetchOverpass(lat, lon, radius){
-    const query = overpassQuery(lat, lon, radius);
-    const res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-      body: new URLSearchParams({ data: query })
-    });
-    if(!res.ok) throw new Error('Error al consultar Overpass');
-    const data = await res.json();
-    return Array.isArray(data.elements) ? data.elements : [];
-  }
+  // Se elimina Overpass: no se realizan peticiones externas
 
   function toItem(el){
     const lat = el.lat || (el.center && el.center.lat);
@@ -129,77 +120,97 @@
     const address = addrParts.join(' ');
     return { lat, lon, name, typeLabel: typeLabelFromTags(tags), address };
   }
+  
+  function toItemFromCustom(obj){
+    const lat = parseFloat(obj.lat);
+    const lon = parseFloat(obj.lon ?? obj.lng);
+    const name = obj.name || obj.nombre || null;
+    const typeLabel = obj.type || obj.typeLabel || null;
+    const address = obj.address || [obj.direccion, obj.municipio].filter(Boolean).join(', ');
+    return { lat, lon, name, typeLabel, address };
+  }
 
   function fitToMarkers(){
     const grp = L.featureGroup(markers.getLayers());
     try { map.fitBounds(grp.getBounds().pad(0.2)); } catch(_) { /* noop */ }
   }
 
-  async function searchAround(lat, lon, radius){
-    clearResults();
-    originMarker = L.marker([lat, lon], { title: 'Origen de búsqueda' }).addTo(map);
-    originMarker.bindPopup('<strong>Centro de búsqueda</strong>').openPopup();
+  // Nueva función: mostrar todo desde JSON local y permitir filtro
+  function renderList(items){
+    resultList.innerHTML = '';
+    items.forEach((it, idx) => {
+      const div = document.createElement('div');
+      div.className = 'border rounded p-3 d-flex justify-content-between align-items-start gap-3';
+      const text = document.createElement('div');
+      const title = document.createElement('h3');
+      title.className = 'h6 mb-1';
+      title.textContent = it.name || 'Lugar';
+      const small = document.createElement('div');
+      small.className = 'small text-body-secondary mb-2';
+      small.textContent = [it.typeLabel, it.address].filter(Boolean).join(' · ');
+      text.appendChild(title);
+      text.appendChild(small);
+      const actions = document.createElement('div');
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-sm btn-primary';
+      btn.textContent = 'Ver en mapa';
+      btn.addEventListener('click', () => focusItem(it));
+      actions.appendChild(btn);
+      div.appendChild(text);
+      div.appendChild(actions);
+      resultList.appendChild(div);
+    });
+  }
 
-    let elements = [];
-    try {
-      elements = await fetchOverpass(lat, lon, radius);
-    } catch(err){
-      console.error(err);
-      const alert = document.createElement('div');
-      alert.className = 'alert alert-danger';
-      alert.textContent = 'No fue posible obtener resultados en este momento. Intenta de nuevo más tarde.';
-      resultList.appendChild(alert);
-      return;
-    }
+  function focusItem(it){
+    map.setView([it.lat, it.lon], 16);
+    const found = itemMarkers.find(m => m.item === it);
+    if(found){ found.marker.openPopup(); }
+  }
 
-    const items = elements
-      .map(toItem)
-      .filter(it => it.lat && it.lon)
-      .slice(0, 50);
+  // Filtro local
+  filtroInput && filtroInput.addEventListener('input', function(){
+    const q = (filtroInput.value || '').toLowerCase();
+    const filtered = customItems.filter(it => {
+      const name = (it.name || '').toLowerCase();
+      const addr = (it.address || '').toLowerCase();
+      return name.includes(q) || addr.includes(q);
+    });
+    markers.clearLayers();
+    itemMarkers = [];
+    filtered.forEach(addMarker);
+    renderList(filtered);
+    fitToMarkers();
+  });
 
-    if(items.length === 0){
-      const alert = document.createElement('div');
-      alert.className = 'alert alert-warning';
-      alert.textContent = 'No se encontraron lugares en el radio indicado. Prueba con un radio mayor o ajusta la búsqueda.';
-      resultList.appendChild(alert);
-    } else {
-      items.forEach(it => { addMarker(it); addResultItem(it); });
-      fitToMarkers();
+  // Se elimina geolocalización
+
+  btnLimpiar.addEventListener('click', function(){
+    filtroInput && (filtroInput.value = '');
+    markers.clearLayers();
+    itemMarkers = [];
+    customItems.forEach(addMarker);
+    renderList(customItems);
+    map.setView(defaultLatLng, 7);
+  });
+
+  async function loadCustomJson(){
+    try{
+      const res = await fetch(CUSTOM_JSON_URL, { headers: { 'Accept': 'application/json' } });
+      if(!res.ok) return; // opcional
+      const data = await res.json();
+      if(Array.isArray(data)){
+        customItems = data.map(toItemFromCustom).filter(it => it.lat && it.lon);
+        // Render inicial: todos los lugares del JSON
+        customItems.forEach(addMarker);
+        renderList(customItems);
+        fitToMarkers();
+      }
+    }catch(err){
+      console.warn('No se pudo cargar el JSON personalizado:', err);
     }
   }
 
-  form.addEventListener('submit', async function(e){
-    e.preventDefault();
-    const q = (dirInput.value || '').trim();
-    const radius = Math.max(200, Math.min(10000, parseInt(radiusInput.value || '2000', 10)));
-    if(!q){ dirInput.focus(); return; }
-    try{
-      const loc = await geocode(q);
-      if(!loc){ alert('No se encontró la dirección. Intenta ser más específico.'); return; }
-      map.setView([loc.lat, loc.lon], 15);
-      await searchAround(loc.lat, loc.lon, radius);
-    }catch(err){
-      console.error(err);
-      alert('Ocurrió un error al buscar la dirección.');
-    }
-  });
-
-  btnUbicacion.addEventListener('click', function(){
-    if(!navigator.geolocation){ alert('La geolocalización no es compatible con este navegador.'); return; }
-    const radius = Math.max(200, Math.min(10000, parseInt(radiusInput.value || '2000', 10)));
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      map.setView([latitude, longitude], 15);
-      await searchAround(latitude, longitude, radius);
-    }, (err) => {
-      console.error(err);
-      alert('No se pudo obtener tu ubicación. Revisa permisos del navegador.');
-    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-  });
-
-  btnLimpiar.addEventListener('click', function(){
-    clearResults();
-    map.setView(defaultLatLng, 5);
-    dirInput.value = '';
-  });
+  // Cargar al iniciar (si existe)
+  loadCustomJson();
 })();

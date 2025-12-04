@@ -1,0 +1,120 @@
+[
+  {
+    "name": "Dirección General del Registro Civil",
+    "address": "Av. Prolongación Alcalde 1855, Miraflores, Guadalajara",
+    "lat": 20.7065,
+    "lon": -103.3497,
+    "type": "Registro Civil"
+  },
+  {
+    "name": "Registro Civil Acatic",
+    "address": "Calle Hidalgo 24, Centro, Acatic",
+    "lat": 20.7852,
+    "lon": -102.9188,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Ahualulco de Mercado",
+    "direccion": "González Madrid 11, Centro",
+    "municipio": "Ahualulco de Mercado",
+    "lat": 20.7014,
+    "lon": -103.9737,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Ameca",
+    "direccion": "Juárez 32, Centro",
+    "municipio": "Ameca",
+    "lat": 20.5481,
+    "lon": -104.0457,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Arandas",
+    "direccion": "Francisco Mora 76, Centro",
+    "municipio": "Arandas",
+    "lat": 20.7055,
+    "lon": -102.3482,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Atotonilco el Alto",
+    "direccion": "Unidad Administrativa Benito Juárez, Centro",
+    "municipio": "Atotonilco el Alto",
+    "lat": 20.5505,
+    "lon": -102.5167,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Atoyac",
+    "direccion": "Independencia 96, Centro",
+    "municipio": "Atoyac",
+    "lat": 19.9123,
+    "lon": -103.5082,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Autlán de Navarro",
+    "direccion": "Venustiano Carranza 1, Centro",
+    "municipio": "Autlán de Navarro",
+    "lat": 19.7693,
+    "lon": -104.366,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Ayotlán",
+    "direccion": "Clemente Aguirre, Centro",
+    "municipio": "Ayotlán",
+    "lat": 20.5285,
+    "lon": -102.3262,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Villa Corona",
+    "direccion": "Venustiano Carranza 24, Centro",
+    "municipio": "Villa Corona",
+    "lat": 20.4162,
+    "lon": -103.6846,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Zapopan Centro",
+    "direccion": "Av. Hidalgo 151, Centro",
+    "municipio": "Zapopan",
+    "lat": 20.7235,
+    "lon": -103.3848,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Tlaquepaque Centro",
+    "direccion": "Independencia 5, Centro",
+    "municipio": "Tlaquepaque",
+    "lat": 20.6409,
+    "lon": -103.2933,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Tonalá Centro",
+    "direccion": "Morelos 45, Centro",
+    "municipio": "Tonalá",
+    "lat": 20.6247,
+    "lon": -103.2336,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil Tlajomulco",
+    "direccion": "Av. Constitución 100, Centro",
+    "municipio": "Tlajomulco",
+    "lat": 20.4722,
+    "lon": -103.4461,
+    "type": "Registro Civil"
+  },
+  {
+    "nombre": "Registro Civil El Salto",
+    "direccion": "Benito Juárez 20, Centro",
+    "municipio": "El Salto",
+    "lat": 20.5169,
+    "lon": -103.1838,
+    "type": "Registro Civil"
+  }
+]

@@ -45,21 +45,18 @@
 
     <section class="py-4">
       <div class="container">
-        <form id="searchForm" class="row g-2 align-items-center" autocomplete="on">
-          <div class="col-12 col-lg-5">
-            <label class="form-label visually-hidden" for="direccion">Dirección u oficina (por ejemplo: "Registro Civil Nuevo ...")</label>
-            <input type="search" id="direccion" class="form-control" placeholder="Ingresa dirección del 'civil nuevo' o zona" />
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-xl-7">
+            <div class="form-text">El mapa muestra únicamente las ubicaciones del archivo local JSON.</div>
           </div>
-          <div class="col-12 col-lg-3">
-            <label class="form-label visually-hidden" for="radio">Radio (m)</label>
-            <input type="number" id="radio" class="form-control" placeholder="Radio en metros" value="2000" min="200" max="10000" step="100" />
+          <div class="col-12 col-xl-5">
+            <div class="input-group">
+              <span class="input-group-text">Filtrar</span>
+              <input type="search" id="filtro" class="form-control" placeholder="Nombre o municipio" />
+              <button class="btn btn-outline-secondary" id="btnLimpiar">Limpiar</button>
+            </div>
           </div>
-          <div class="col-12 col-lg-4 d-grid d-lg-flex gap-2">
-            <button class="btn btn-primary" type="submit">Buscar</button>
-            <button class="btn btn-outline-secondary" type="button" id="btnUbicacion">Usar mi ubicación</button>
-            <button class="btn btn-outline-danger" type="button" id="btnLimpiar">Limpiar</button>
-          </div>
-        </form>
+        </div>
       </div>
     </section>
 
@@ -72,11 +69,11 @@
           <div class="col-12 col-xl-5">
             <div class="card h-100 shadow-sm">
               <div class="card-body">
-                <h2 class="h5 mb-3">Resultados cercanos</h2>
+                <h2 class="h5 mb-3">Ubicaciones</h2>
                 <div id="resultList" class="vstack gap-3" aria-live="polite"></div>
               </div>
               <div class="card-footer small text-body-secondary">
-                Fuente de datos: OpenStreetMap (Overpass API) — Puede contener imprecisiones. Confirma siempre con la entidad correspondiente.
+                Fuente de datos: Archivo local JSON (`assets/data/lugares.json`).
               </div>
             </div>
           </div>
