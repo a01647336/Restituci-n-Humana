@@ -1,0 +1,29 @@
+/* Tema base */
+:root{
+  --brand: #1155cc;
+  --brand-2: #0b3a88;
+}
+
+html, body { height: 100%; }
+
+.navbar-brand img { filter: drop-shadow(0 0 0 rgba(0,0,0,0.1)); }
+
+.btn-primary{
+  --bs-btn-bg: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand-2);
+  --bs-btn-hover-border-color: var(--brand-2);
+}
+
+.card { border-radius: 0.75rem; }
+
+footer { position: relative; z-index: 1; }
+
+/* Utilidades */
+.shadow-soft { box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.06); }
+
+/* Accesibilidad */
+:focus-visible { outline: 3px solid #88b4ff; outline-offset: 2px; }
+
+/* Mapa */
+#map .leaflet-popup-content-wrapper { border-radius: 0.5rem; }
